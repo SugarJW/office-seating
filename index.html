@@ -965,21 +965,24 @@ const defaultSeats = [
   { id: 'R3-3', roomId: 'R3', x: 126, y: 30,  w: 54, h: 40 },
   { id: 'R3-4', roomId: 'R3', x: 126, y: 100, w: 54, h: 40 },
 
-  // R4: 92m² - 12 seats (3 paired columns, 2 groups of 2 rows, spread across room)
-  // Top group: 3 cols x 2 rows
-  { id: 'R4-1',  roomId: 'R4', x: 30,  y: 35,  w: 54, h: 40 },
-  { id: 'R4-2',  roomId: 'R4', x: 30,  y: 90,  w: 54, h: 40 },
-  { id: 'R4-3',  roomId: 'R4', x: 160, y: 35,  w: 54, h: 40 },
-  { id: 'R4-4',  roomId: 'R4', x: 160, y: 90,  w: 54, h: 40 },
-  { id: 'R4-5',  roomId: 'R4', x: 290, y: 35,  w: 54, h: 40 },
-  { id: 'R4-6',  roomId: 'R4', x: 290, y: 90,  w: 54, h: 40 },
-  // Bottom group: 3 cols x 2 rows
-  { id: 'R4-7',  roomId: 'R4', x: 30,  y: 225, w: 54, h: 40 },
-  { id: 'R4-8',  roomId: 'R4', x: 30,  y: 280, w: 54, h: 40 },
-  { id: 'R4-9',  roomId: 'R4', x: 160, y: 225, w: 54, h: 40 },
-  { id: 'R4-10', roomId: 'R4', x: 160, y: 280, w: 54, h: 40 },
-  { id: 'R4-11', roomId: 'R4', x: 290, y: 225, w: 54, h: 40 },
-  { id: 'R4-12', roomId: 'R4', x: 290, y: 280, w: 54, h: 40 },
+  // R4: 92m² (474w x 430h) - 12 seats, spread evenly across the room
+  // 3 cols spaced across full width, 2 groups spaced across full height
+  // col centers: ~80, 210, 340  (gaps ~130px)
+  // top group rows: ~50, 110    bottom group rows: ~270, 330
+  // Top group
+  { id: 'R4-1',  roomId: 'R4', x: 55,  y: 50,  w: 54, h: 40 },
+  { id: 'R4-2',  roomId: 'R4', x: 55,  y: 110, w: 54, h: 40 },
+  { id: 'R4-3',  roomId: 'R4', x: 185, y: 50,  w: 54, h: 40 },
+  { id: 'R4-4',  roomId: 'R4', x: 185, y: 110, w: 54, h: 40 },
+  { id: 'R4-5',  roomId: 'R4', x: 315, y: 50,  w: 54, h: 40 },
+  { id: 'R4-6',  roomId: 'R4', x: 315, y: 110, w: 54, h: 40 },
+  // Bottom group
+  { id: 'R4-7',  roomId: 'R4', x: 55,  y: 270, w: 54, h: 40 },
+  { id: 'R4-8',  roomId: 'R4', x: 55,  y: 330, w: 54, h: 40 },
+  { id: 'R4-9',  roomId: 'R4', x: 185, y: 270, w: 54, h: 40 },
+  { id: 'R4-10', roomId: 'R4', x: 185, y: 330, w: 54, h: 40 },
+  { id: 'R4-11', roomId: 'R4', x: 315, y: 270, w: 54, h: 40 },
+  { id: 'R4-12', roomId: 'R4', x: 315, y: 330, w: 54, h: 40 },
 
   // R5: 25m² meeting room - 6 seats around table
   { id: 'R5-1', roomId: 'R5', x: 30,  y: 75,  w: 54, h: 40 },
@@ -1044,7 +1047,7 @@ function renderFloorPlan() {
 
   // 5. R4 aisle
   const r4 = rooms.find(r => r.id === 'R4');
-  addDiv('furniture', r4.x + 20, r4.y + 170, 370, 1, 'border:none;background:rgba(74,111,165,0.12);');
+  addDiv('furniture', r4.x + 40, r4.y + 200, 380, 1, 'border:none;background:rgba(74,111,165,0.12);');
 
   // 6. Door arcs
   const arc1 = document.createElement('div');
