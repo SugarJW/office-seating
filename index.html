@@ -485,7 +485,7 @@
     padding: 0;
   }
 
-  .seat.occupied:hover .unseat-btn { display: flex; }
+  .seat:hover .unseat-btn { display: flex; }
 
   /* Walls / interior structure lines */
   .wall {
@@ -888,6 +888,7 @@ function saveState() {
     people: state.people,
     seats: state.seats,
     customSeats: state.customSeats || [],
+    removedSeats: state.removedSeats || [],
     nextPersonId: state.nextPersonId,
   };
   dbRef.set(shared);
@@ -964,21 +965,21 @@ const defaultSeats = [
   { id: 'R3-3', roomId: 'R3', x: 126, y: 30,  w: 54, h: 40 },
   { id: 'R3-4', roomId: 'R3', x: 126, y: 100, w: 54, h: 40 },
 
-  // R4: 92m² - 12 seats (3 paired columns, 2 groups of 2 rows)
+  // R4: 92m² - 12 seats (3 paired columns, 2 groups of 2 rows, spread across room)
   // Top group: 3 cols x 2 rows
-  { id: 'R4-1',  roomId: 'R4', x: 30,  y: 30,  w: 54, h: 40 },
-  { id: 'R4-2',  roomId: 'R4', x: 30,  y: 78,  w: 54, h: 40 },
-  { id: 'R4-3',  roomId: 'R4', x: 130, y: 30,  w: 54, h: 40 },
-  { id: 'R4-4',  roomId: 'R4', x: 130, y: 78,  w: 54, h: 40 },
-  { id: 'R4-5',  roomId: 'R4', x: 230, y: 30,  w: 54, h: 40 },
-  { id: 'R4-6',  roomId: 'R4', x: 230, y: 78,  w: 54, h: 40 },
+  { id: 'R4-1',  roomId: 'R4', x: 30,  y: 35,  w: 54, h: 40 },
+  { id: 'R4-2',  roomId: 'R4', x: 30,  y: 90,  w: 54, h: 40 },
+  { id: 'R4-3',  roomId: 'R4', x: 160, y: 35,  w: 54, h: 40 },
+  { id: 'R4-4',  roomId: 'R4', x: 160, y: 90,  w: 54, h: 40 },
+  { id: 'R4-5',  roomId: 'R4', x: 290, y: 35,  w: 54, h: 40 },
+  { id: 'R4-6',  roomId: 'R4', x: 290, y: 90,  w: 54, h: 40 },
   // Bottom group: 3 cols x 2 rows
-  { id: 'R4-7',  roomId: 'R4', x: 30,  y: 205, w: 54, h: 40 },
-  { id: 'R4-8',  roomId: 'R4', x: 30,  y: 253, w: 54, h: 40 },
-  { id: 'R4-9',  roomId: 'R4', x: 130, y: 205, w: 54, h: 40 },
-  { id: 'R4-10', roomId: 'R4', x: 130, y: 253, w: 54, h: 40 },
-  { id: 'R4-11', roomId: 'R4', x: 230, y: 205, w: 54, h: 40 },
-  { id: 'R4-12', roomId: 'R4', x: 230, y: 253, w: 54, h: 40 },
+  { id: 'R4-7',  roomId: 'R4', x: 30,  y: 225, w: 54, h: 40 },
+  { id: 'R4-8',  roomId: 'R4', x: 30,  y: 280, w: 54, h: 40 },
+  { id: 'R4-9',  roomId: 'R4', x: 160, y: 225, w: 54, h: 40 },
+  { id: 'R4-10', roomId: 'R4', x: 160, y: 280, w: 54, h: 40 },
+  { id: 'R4-11', roomId: 'R4', x: 290, y: 225, w: 54, h: 40 },
+  { id: 'R4-12', roomId: 'R4', x: 290, y: 280, w: 54, h: 40 },
 
   // R5: 25m² meeting room - 6 seats around table
   { id: 'R5-1', roomId: 'R5', x: 30,  y: 75,  w: 54, h: 40 },
@@ -998,7 +999,9 @@ const defaultSeats = [
 ];
 
 function getSeats() {
-  return defaultSeats.concat(state.customSeats || []);
+  const removed = state.removedSeats || [];
+  const kept = defaultSeats.filter(s => !removed.includes(s.id));
+  return kept.concat(state.customSeats || []);
 }
 
 function renderFloorPlan() {
@@ -1041,7 +1044,7 @@ function renderFloorPlan() {
 
   // 5. R4 aisle
   const r4 = rooms.find(r => r.id === 'R4');
-  addDiv('furniture', r4.x + 20, r4.y + 155, 290, 1, 'border:none;background:rgba(74,111,165,0.12);');
+  addDiv('furniture', r4.x + 20, r4.y + 170, 370, 1, 'border:none;background:rgba(74,111,165,0.12);');
 
   // 6. Door arcs
   const arc1 = document.createElement('div');
@@ -1111,24 +1114,21 @@ function renderFloorPlan() {
       seatDiv.style.borderColor = teamColor;
       seatDiv.style.background = hexToRgba(teamColor, 0.12);
 
-      const isCustom = s.id.startsWith('C-');
       seatDiv.innerHTML = `
         <span class="seat-name">${occupant.name}</span>
         <span class="seat-dot" style="background:${teamColor}"></span>
         <button class="unseat-btn" onclick="unseatPerson('${s.id}', event)" title="移除">✕</button>
-        ${isCustom ? `<button class="unseat-btn" style="left:-6px;right:auto;" onclick="removeCustomSeat('${s.id}', event)" title="删除工位">🗑</button>` : ''}
+        <button class="unseat-btn" style="left:-6px;right:auto;" onclick="removeSeat('${s.id}', event)" title="删除工位">🗑</button>
       `;
       seatDiv.draggable = true;
       seatDiv.addEventListener('dragstart', (e) => onSeatDragStart(e, s.id));
     } else {
-      const isCustom = s.id.startsWith('C-');
       const label = s.id.includes('-') ? s.id.split('-')[1] : s.id;
+      const isCustom = s.id.startsWith('C-');
       seatDiv.innerHTML = `<span class="seat-number">${isCustom ? '+' : label}</span>
-        ${isCustom ? `<button class="unseat-btn" style="display:none;" onclick="removeCustomSeat('${s.id}', event)" title="删除工位">🗑</button>` : ''}`;
-      if (isCustom) {
-        seatDiv.addEventListener('mouseenter', () => { seatDiv.querySelector('.unseat-btn').style.display = 'flex'; });
-        seatDiv.addEventListener('mouseleave', () => { seatDiv.querySelector('.unseat-btn').style.display = 'none'; });
-      }
+        <button class="unseat-btn" style="display:none;left:-6px;right:auto;" onclick="removeSeat('${s.id}', event)" title="删除工位">🗑</button>`;
+      seatDiv.addEventListener('mouseenter', () => { const b = seatDiv.querySelector('.unseat-btn'); if(b) b.style.display = 'flex'; });
+      seatDiv.addEventListener('mouseleave', () => { const b = seatDiv.querySelector('.unseat-btn'); if(b) b.style.display = 'none'; });
     }
 
     seatDiv.addEventListener('dragover', onDragOver);
@@ -1143,10 +1143,16 @@ function renderFloorPlan() {
   });
 }
 
-function removeCustomSeat(seatId, e) {
+function removeSeat(seatId, e) {
   e.stopPropagation();
-  if (!state.customSeats) return;
-  state.customSeats = state.customSeats.filter(s => s.id !== seatId);
+  if (seatId.startsWith('C-')) {
+    if (state.customSeats) {
+      state.customSeats = state.customSeats.filter(s => s.id !== seatId);
+    }
+  } else {
+    if (!state.removedSeats) state.removedSeats = [];
+    if (!state.removedSeats.includes(seatId)) state.removedSeats.push(seatId);
+  }
   delete state.seats[seatId];
   saveState();
   renderAll();
@@ -1529,6 +1535,7 @@ dbRef.on('value', (snapshot) => {
     state.people = data.people || [];
     state.seats = data.seats || {};
     state.customSeats = data.customSeats || [];
+    state.removedSeats = data.removedSeats || [];
     state.nextPersonId = data.nextPersonId || 1;
     state.activeFilter = savedFilter;
     if (Array.isArray(state.people)) {
