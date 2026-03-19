@@ -965,36 +965,35 @@ const defaultSeats = [
   { id: 'R3-3', roomId: 'R3', x: 126, y: 30,  w: 54, h: 40 },
   { id: 'R3-4', roomId: 'R3', x: 126, y: 100, w: 54, h: 40 },
 
-  // R4: 92m² (474w x 430h) - 12 seats matching blueprint layout
-  // Blueprint shows: 2 groups (top & bottom), each 3 pairs face-to-face
-  // Each pair shares a desk, seats face each other across a horizontal partition
-  // Seats spread across full room width, groups use full height
+  // R4: 92m² (474w x 430h) - 12 seats: 3 rows x 4 columns
   //
-  // Layout:  col1(70)   col2(200)   col3(330)
-  //  row1:    [1]         [3]         [5]       <- face down
-  //  ---- desk partition ----
-  //  row2:    [2]         [4]         [6]       <- face up
+  //  Layout (from blueprint):
+  //   col1      col2      col3      col4
+  //   [1]       [2]       [3]       [4]     row1 (face down)
+  //   ========= desk partition =========
+  //   [5]       [6]       [7]       [8]     row2 (face up, paired with row1)
   //
-  //           ~~ aisle ~~
+  //              ~~ aisle ~~
   //
-  //  row3:    [7]         [9]         [11]      <- face down
-  //  ---- desk partition ----
-  //  row4:    [8]         [10]        [12]      <- face up
+  //   [9]       [10]      [11]      [12]    row3 (face up, paired with row2)
+  //   ========= desk partition =========
 
-  // Top group (y: 30-130, centered around desk at y~80)
-  { id: 'R4-1',  roomId: 'R4', x: 70,  y: 30,  w: 54, h: 40 },
-  { id: 'R4-2',  roomId: 'R4', x: 70,  y: 95,  w: 54, h: 40 },
-  { id: 'R4-3',  roomId: 'R4', x: 200, y: 30,  w: 54, h: 40 },
-  { id: 'R4-4',  roomId: 'R4', x: 200, y: 95,  w: 54, h: 40 },
-  { id: 'R4-5',  roomId: 'R4', x: 340, y: 30,  w: 54, h: 40 },
-  { id: 'R4-6',  roomId: 'R4', x: 340, y: 95,  w: 54, h: 40 },
-  // Bottom group (y: 245-345, centered around desk at y~295)
-  { id: 'R4-7',  roomId: 'R4', x: 70,  y: 245, w: 54, h: 40 },
-  { id: 'R4-8',  roomId: 'R4', x: 70,  y: 310, w: 54, h: 40 },
-  { id: 'R4-9',  roomId: 'R4', x: 200, y: 245, w: 54, h: 40 },
-  { id: 'R4-10', roomId: 'R4', x: 200, y: 310, w: 54, h: 40 },
-  { id: 'R4-11', roomId: 'R4', x: 340, y: 245, w: 54, h: 40 },
-  { id: 'R4-12', roomId: 'R4', x: 340, y: 310, w: 54, h: 40 },
+  // 4 columns evenly across 474px: x = 45, 150, 260, 370
+  // Row 1 (top): y=35
+  { id: 'R4-1',  roomId: 'R4', x: 45,  y: 35,  w: 54, h: 40 },
+  { id: 'R4-2',  roomId: 'R4', x: 150, y: 35,  w: 54, h: 40 },
+  { id: 'R4-3',  roomId: 'R4', x: 260, y: 35,  w: 54, h: 40 },
+  { id: 'R4-4',  roomId: 'R4', x: 370, y: 35,  w: 54, h: 40 },
+  // Row 2 (middle, faces row 1): y=120
+  { id: 'R4-5',  roomId: 'R4', x: 45,  y: 120, w: 54, h: 40 },
+  { id: 'R4-6',  roomId: 'R4', x: 150, y: 120, w: 54, h: 40 },
+  { id: 'R4-7',  roomId: 'R4', x: 260, y: 120, w: 54, h: 40 },
+  { id: 'R4-8',  roomId: 'R4', x: 370, y: 120, w: 54, h: 40 },
+  // Row 3 (bottom, faces row 2): y=270
+  { id: 'R4-9',  roomId: 'R4', x: 45,  y: 270, w: 54, h: 40 },
+  { id: 'R4-10', roomId: 'R4', x: 150, y: 270, w: 54, h: 40 },
+  { id: 'R4-11', roomId: 'R4', x: 260, y: 270, w: 54, h: 40 },
+  { id: 'R4-12', roomId: 'R4', x: 370, y: 270, w: 54, h: 40 },
 
   // R5: 25m² meeting room - 6 seats around table
   { id: 'R5-1', roomId: 'R5', x: 30,  y: 75,  w: 54, h: 40 },
@@ -1059,12 +1058,12 @@ function renderFloorPlan() {
 
   // 5. R4 desk partitions and aisle
   const r4 = rooms.find(r => r.id === 'R4');
-  // Top group desk partition (between row1 and row2)
-  addDiv('furniture', r4.x + 55, r4.y + 76, 355, 1, 'border:none;background:rgba(74,111,165,0.2);');
-  // Bottom group desk partition (between row3 and row4)
-  addDiv('furniture', r4.x + 55, r4.y + 291, 355, 1, 'border:none;background:rgba(74,111,165,0.2);');
-  // Aisle between top and bottom groups
-  addDiv('furniture', r4.x + 40, r4.y + 190, 400, 1, 'border:none;background:rgba(74,111,165,0.1);');
+  // Desk partition between row 1 and row 2
+  addDiv('furniture', r4.x + 35, r4.y + 83, 400, 1, 'border:none;background:rgba(74,111,165,0.2);');
+  // Aisle between row 2 and row 3
+  addDiv('furniture', r4.x + 30, r4.y + 200, 420, 1, 'border:none;background:rgba(74,111,165,0.1);');
+  // Desk partition between row 2 and row 3 (lower desk line)
+  addDiv('furniture', r4.x + 35, r4.y + 255, 400, 1, 'border:none;background:rgba(74,111,165,0.2);');
 
   // 6. Door arcs
   const arc1 = document.createElement('div');
